@@ -1,0 +1,57 @@
+// Echidna properties for Counter.sol
+
+// Property 1: Count should always be non-negative.
+// This is not enforced by the contract, but is a reasonable expectation.
+// We'll test for this by repeatedly incrementing and decrementing.
+property CountIsNonNegative():
+    uint256 initialCount = contract.get();
+    uint256 numIncrements = 100;
+    uint256 numDecrements = 50;
+
+    // Increment the counter
+    for i in range(numIncrements):
+        contract.inc();
+
+    // Decrement the counter
+    for i in range(numDecrements):
+        contract.dec();
+
+    // Check that the count is non-negative
+    assert(contract.get() >= 0);
+
+// Property 2:  Incrementing increases the count by 1.
+property IncrementIncreasesCount():
+    uint256 initialCount = contract.get();
+    contract.inc();
+    assert(contract.get() == initialCount + 1);
+
+// Property 3: Decrementing decreases the count by 1.
+property DecrementDecreasesCount():
+    uint256 initialCount = contract.get();
+    contract.dec();
+    assert(contract.get() == initialCount - 1);
+
+// Property 4:  Decrementing from 0 reverts.  This is a crucial property.
+property DecrementFromZeroReverts():
+    contract.count = 0; // Set count to 0
+    expect(contract.dec()).revert();
+
+// Property 5: Repeated increments and decrements maintain consistency.
+property RepeatedIncDecConsistency():
+    uint256 initialCount = contract.get();
+    uint256 numIncrements = 50;
+    uint256 numDecrements = 25;
+
+    for i in range(numIncrements):
+        contract.inc();
+    for i in range(numDecrements):
+        contract.dec();
+
+    assert(contract.get() == initialCount + numIncrements - numDecrements);
+
+// Property 6:  Get function returns the correct count.
+property GetReturnsCorrectCount():
+    uint256 initialCount = contract.get();
+    contract.inc();
+    contract.inc();
+    assert(contract.get() == initialCount + 2);
